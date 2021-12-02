@@ -5,13 +5,13 @@ use regex::Regex;
 
 fn main() {
     // Define coordinates - part one
-    let mut x = 0; // Horizontal coordinate
-    let mut z = 0; // Vertical coordinate. This is depth!
+    let mut x = 0;   // Horizontal coordinate
+    let mut z = 0;   // Vertical coordinate. This is depth!
 
     // Define aim and coordinates - part two
-    let mut x2 = 0;
-    let mut z2 = 0;
-    let mut aim = 0;
+    let mut x2 = 0;  // Horizontal coordinate
+    let mut z2 = 0;  // Vertical coordinate. Interpret as depth!
+    let mut aim = 0; // Aim. Change in depth is aim*forward.
 
     // Define the parser regex
     let re = Regex::new(r"(up|down|forward) (\d+)").unwrap();
