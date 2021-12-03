@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
-use std::convert::TryInto;
 
 fn main(){
     // Define variables
@@ -24,22 +23,20 @@ fn main(){
                     tmp[i] = *n;
                 }
                 num += 1;
+                
+                // Push current tmp data to vector of all values
                 data.push(tmp);
             }
 
             // Calculate gamma and epsilon rates
-            let gamma: [i32; 12] = sum
+            let gamma = sum
                 .iter()
                 .map(|x| 2*x/(num))
-                .collect::<Vec<i32>>()
-                .try_into()
-                .unwrap();
-            let epsilon: [i32; 12]= gamma
+                .collect::<Vec<i32>>();
+            let epsilon = gamma
                 .iter()
                 .map(|x| 1 - x)
-                .collect::<Vec<i32>>()
-                .try_into()
-                .unwrap();
+                .collect::<Vec<i32>>();
             let gammai = to_dec(&gamma);
             let epsiloni = to_dec(&epsilon);
 
@@ -71,10 +68,8 @@ fn main(){
             }
 
             // Calculate environment rates
-            let gen = candidates_o2[0];
-            let scr = candidates_co2[0];
-            //let geni: u32 = gen.iter().fold(0, |acc, &b| acc*2 + b as u32);
-            //let scri: u32 = scr.iter().fold(0, |acc, &b| acc*2 + b as u32);
+            let gen = candidates_o2[0].to_vec();
+            let scr = candidates_co2[0].to_vec();
             let geni = to_dec(&gen);
             let scri = to_dec(&scr);
 
@@ -93,7 +88,7 @@ fn main(){
     }
 }
 
-fn to_dec(binary: &[i32]) -> u32 
+fn to_dec(binary: &Vec<i32>) -> u32 
 {
     binary.iter().fold(0, |acc, &b| acc*2 + b  as u32)
 }
