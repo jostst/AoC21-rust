@@ -65,13 +65,13 @@ fn main(){
             let geni: u32 = gen.iter().fold(0, |acc, &b| acc*2 + b as u32);
             let scri: u32 = scr.iter().fold(0, |acc, &b| acc*2 + b as u32);
 
-            println!("Gamma rate: {:?} or {}", gamma, gammai);
-            println!("Epsilon rate: {:?} or {}", epsilon, epsiloni);
-            println!("Power (gr*er): {}", epsiloni*gammai);
+            println!("Gamma rate: \t\t{:?} or {}", gamma, gammai);
+            println!("Epsilon rate: \t\t{:?} or {}", epsilon, epsiloni);
+            println!("Power (gr*er): \t\t{}", epsiloni*gammai);
 
-            println!("O2 generator rating: {:?} or {}", gen, geni);
-            println!("CO2 scrubber rating: {:?} or {}", scr, scri);
-            println!("Life support rating: {}", geni * scri);
+            println!("O2 generator rating: \t{:?} or {}", gen, geni);
+            println!("CO2 scrubber rating: \t{:?} or {}", scr, scri);
+            println!("Life support rating: \t{}", geni * scri);
         },
         Result::Err(e) => {
             println!("File error!");
