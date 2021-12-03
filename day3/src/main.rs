@@ -6,16 +6,24 @@ fn main(){
     // Define variables
     let mut num: i32 = 0;
     let mut sum: [i32; 12] = [0; 12];
+    let mut data: Vec<[i32; 12]> = Vec::new();
 
     match read_lines("./input"){
         Result::Ok(lines) => {
             // Calculate sum of individual elements
             for line in lines {
                 let string = line.expect("Need a line");
+                // Define temporary  structure
+                let mut tmp: [i32; 12] = [0; 12];
+
+                // Iterate over all the numbers
                 for i in 0..12 {
-                    sum[i] += &string[i..i+1].parse::<i32>().expect("Cannot parse");
+                    let n = &string[i..i+1].parse::<i32>().expect("Cannot parse");
+                    sum[i] += n;
+                    tmp[i] = *n;
                 }
                 num += 1;
+                data.push(tmp);
             }
 
             // Calculate gamma and epsilon rates
@@ -24,11 +32,48 @@ fn main(){
             let gammai: u32 = gamma.iter().fold(0, |acc, &b| acc*2 + b as u32);
             let epsiloni: u32 = epsilon.iter().fold(0, |acc, &b| acc*2 + b as u32);
 
-            println!("Sums: {}, {}, {}, {}, {}", sum[0], sum[1], sum[2], sum[3], sum[4]);
-            println!("Num: {}", num);
+            // Iterate over all 12 numbers to obtain the o2 and co2 rates
+            let mut candidates_o2 = data.clone();
+            let mut candidates_co2 = data.clone();
+            for i in 0..12 {
+                // Filter vectors
+                let len_o2: i32 = candidates_o2.len() as i32;
+                if len_o2 > 1 {
+                    let mut t = 0;
+                    let ones_o2: i32 = candidates_o2
+                        .iter()
+                        .fold(0, |acc, &b| acc + b[i]);
+                    if ones_o2 >= (len_o2 - ones_o2) {t = 1;};
+                    candidates_o2 = candidates_o2
+                        .into_iter()
+                        .filter(|x| x[i] == t)
+                        .collect();
+                };
+                let len_co2: i32 = candidates_co2.len() as i32;
+                if len_co2 > 1 {
+                    let mut t = 0;
+                    let ones_co2: i32 = candidates_co2
+                        .iter()
+                        .fold(0, |acc, &b| acc + b[i]);
+                    if ones_co2 < (len_co2 - ones_co2) {t = 1;};
+                    candidates_co2 = candidates_co2
+                        .into_iter()
+                        .filter(|x| x[i] == t)
+                        .collect();
+                };
+            }
+            let gen = candidates_o2[0];
+            let scr = candidates_co2[0];
+            let geni: u32 = gen.iter().fold(0, |acc, &b| acc*2 + b as u32);
+            let scri: u32 = scr.iter().fold(0, |acc, &b| acc*2 + b as u32);
+
             println!("Gamma rate: {:?} or {}", gamma, gammai);
             println!("Epsilon rate: {:?} or {}", epsilon, epsiloni);
             println!("Power (gr*er): {}", epsiloni*gammai);
+
+            println!("O2 generator rating: {:?} or {}", gen, geni);
+            println!("CO2 scrubber rating: {:?} or {}", scr, scri);
+            println!("Life support rating: {}", geni * scri);
         },
         Result::Err(e) => {
             println!("File error!");
