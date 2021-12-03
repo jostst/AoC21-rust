@@ -27,7 +27,7 @@ fn main(){
             }
 
             // Calculate gamma and epsilon rates
-            let gamma: Vec<i32> = sum.to_vec().iter().map(|x| x/(num/2)).collect();
+            let gamma: Vec<i32> = sum.to_vec().iter().map(|x| 2*x/(num)).collect();
             let epsilon: Vec<i32> = gamma.iter().map(|x| 1 - x).collect();
             let gammai: u32 = gamma.iter().fold(0, |acc, &b| acc*2 + b as u32);
             let epsiloni: u32 = epsilon.iter().fold(0, |acc, &b| acc*2 + b as u32);
@@ -37,25 +37,23 @@ fn main(){
             let mut candidates_co2 = data.clone();
             for i in 0..12 {
                 // Filter vectors
-                let len_o2: i32 = candidates_o2.len() as i32;
-                if len_o2 > 1 {
+                if candidates_o2.len() > 1 {
                     let mut t = 0;
                     let ones_o2: i32 = candidates_o2
                         .iter()
                         .fold(0, |acc, &b| acc + b[i]);
-                    if ones_o2 >= (len_o2 - ones_o2) {t = 1;};
+                    if 2*ones_o2 >= candidates_o2.len() as i32 {t = 1;};
                     candidates_o2 = candidates_o2
                         .into_iter()
                         .filter(|x| x[i] == t)
                         .collect();
                 };
-                let len_co2: i32 = candidates_co2.len() as i32;
-                if len_co2 > 1 {
+                if candidates_co2.len() > 1 {
                     let mut t = 0;
                     let ones_co2: i32 = candidates_co2
                         .iter()
                         .fold(0, |acc, &b| acc + b[i]);
-                    if ones_co2 < (len_co2 - ones_co2) {t = 1;};
+                    if 2*ones_co2 < candidates_co2.len() as i32 {t = 1;};
                     candidates_co2 = candidates_co2
                         .into_iter()
                         .filter(|x| x[i] == t)
