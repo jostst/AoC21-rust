@@ -91,7 +91,7 @@ fn main(){
 
 fn to_dec(binary: &Vec<i32>) -> u32 
 {
-    binary.iter().fold(0, |acc, &b| acc*2 + b  as u32)
+    binary.iter().fold(0, |acc, &b| acc*2 + b) as u32
 }
 
 // The output is wrapped in a Result to allow matching on errors
