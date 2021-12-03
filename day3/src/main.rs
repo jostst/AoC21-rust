@@ -3,27 +3,26 @@ use std::io::{self, BufRead};
 use std::path::Path;
 
 fn main(){
+    // Define constant of input size
+    const SIZE: usize = 12;
     // Define variables
     let mut num: i32 = 0;
-    let mut sum: [i32; 12] = [0; 12];
-    let mut data: Vec<[i32; 12]> = Vec::new();
+    let mut sum: [i32; SIZE] = [0; SIZE];
+    let mut data: Vec<[i32; SIZE]> = Vec::new();
+    let mut tmp: [i32; SIZE] = [0; SIZE];
 
     match read_lines("./input"){
         Result::Ok(lines) => {
             // Calculate sum of individual elements
             for line in lines {
                 let string = line.expect("Need a line");
-                // Define temporary  structure
-                let mut tmp: [i32; 12] = [0; 12];
-
                 // Iterate over all the numbers
-                for i in 0..12 {
-                    let n = &string[i..i+1].parse::<i32>().expect("Cannot parse");
+                for i in 0..SIZE {
+                    let n = string[i..i+1].parse::<i32>().expect("Cannot parse");
                     sum[i] += n;
-                    tmp[i] = *n;
+                    tmp[i] = n;
                 }
                 num += 1;
-                
                 // Push current tmp data to vector of all values
                 data.push(tmp);
             }
@@ -40,10 +39,15 @@ fn main(){
             let gammai = to_dec(&gamma);
             let epsiloni = to_dec(&epsilon);
 
-            // Iterate over all 12 numbers to obtain the o2 and co2 rates
+            // Output power data
+            println!("Gamma rate: \t\t{:?} or {}", gamma, gammai);
+            println!("Epsilon rate: \t\t{:?} or {}", epsilon, epsiloni);
+            println!("Power (gr*er): \t\t{}", epsiloni*gammai);
+
+            // Iterate over all bits to obtain the o2 and co2 rates
             let mut candidates_o2 = data.clone();
             let mut candidates_co2 = data.clone();
-            for i in 0..12 {
+            for i in 0..SIZE {
                 // Filter vectors
                 if candidates_o2.len() > 1 {
                     let ones_o2: i32 = candidates_o2
@@ -73,10 +77,7 @@ fn main(){
             let geni = to_dec(&gen);
             let scri = to_dec(&scr);
 
-            println!("Gamma rate: \t\t{:?} or {}", gamma, gammai);
-            println!("Epsilon rate: \t\t{:?} or {}", epsilon, epsiloni);
-            println!("Power (gr*er): \t\t{}", epsiloni*gammai);
-
+            // Output environment data
             println!("O2 generator rating: \t{:?} or {}", gen, geni);
             println!("CO2 scrubber rating: \t{:?} or {}", scr, scri);
             println!("Life support rating: \t{}", geni * scri);
