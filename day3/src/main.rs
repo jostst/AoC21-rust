@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use std::convert::TryInto;
 
 fn main(){
     // Define variables
@@ -27,10 +28,20 @@ fn main(){
             }
 
             // Calculate gamma and epsilon rates
-            let gamma: Vec<i32> = sum.to_vec().iter().map(|x| 2*x/(num)).collect();
-            let epsilon: Vec<i32> = gamma.iter().map(|x| 1 - x).collect();
-            let gammai: u32 = gamma.iter().fold(0, |acc, &b| acc*2 + b as u32);
-            let epsiloni: u32 = epsilon.iter().fold(0, |acc, &b| acc*2 + b as u32);
+            let gamma: [i32; 12] = sum
+                .iter()
+                .map(|x| 2*x/(num))
+                .collect::<Vec<i32>>()
+                .try_into()
+                .unwrap();
+            let epsilon: [i32; 12]= gamma
+                .iter()
+                .map(|x| 1 - x)
+                .collect::<Vec<i32>>()
+                .try_into()
+                .unwrap();
+            let gammai = to_dec(&gamma);
+            let epsiloni = to_dec(&epsilon);
 
             // Iterate over all 12 numbers to obtain the o2 and co2 rates
             let mut candidates_o2 = data.clone();
@@ -38,32 +49,34 @@ fn main(){
             for i in 0..12 {
                 // Filter vectors
                 if candidates_o2.len() > 1 {
-                    let mut t = 0;
                     let ones_o2: i32 = candidates_o2
                         .iter()
                         .fold(0, |acc, &b| acc + b[i]);
-                    if 2*ones_o2 >= candidates_o2.len() as i32 {t = 1;};
+                    let t = if 2*ones_o2 >= candidates_o2.len() as i32 {1} else {0};
                     candidates_o2 = candidates_o2
                         .into_iter()
                         .filter(|x| x[i] == t)
                         .collect();
                 };
                 if candidates_co2.len() > 1 {
-                    let mut t = 0;
                     let ones_co2: i32 = candidates_co2
                         .iter()
                         .fold(0, |acc, &b| acc + b[i]);
-                    if 2*ones_co2 < candidates_co2.len() as i32 {t = 1;};
+                    let t = if 2*ones_co2 < candidates_co2.len() as i32 {1} else {0};
                     candidates_co2 = candidates_co2
                         .into_iter()
                         .filter(|x| x[i] == t)
                         .collect();
                 };
             }
+
+            // Calculate environment rates
             let gen = candidates_o2[0];
             let scr = candidates_co2[0];
-            let geni: u32 = gen.iter().fold(0, |acc, &b| acc*2 + b as u32);
-            let scri: u32 = scr.iter().fold(0, |acc, &b| acc*2 + b as u32);
+            //let geni: u32 = gen.iter().fold(0, |acc, &b| acc*2 + b as u32);
+            //let scri: u32 = scr.iter().fold(0, |acc, &b| acc*2 + b as u32);
+            let geni = to_dec(&gen);
+            let scri = to_dec(&scr);
 
             println!("Gamma rate: \t\t{:?} or {}", gamma, gammai);
             println!("Epsilon rate: \t\t{:?} or {}", epsilon, epsiloni);
@@ -78,6 +91,11 @@ fn main(){
             println!("{:?}", e);
         },
     }
+}
+
+fn to_dec(binary: &[i32]) -> u32 
+{
+    binary.iter().fold(0, |acc, &b| acc*2 + b  as u32)
 }
 
 // The output is wrapped in a Result to allow matching on errors
