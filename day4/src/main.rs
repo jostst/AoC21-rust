@@ -22,14 +22,26 @@ fn main() {
 // This is the data of a single number on the board
 struct BingoNumber{
     num: u32,
-    x: u32,
-    y: u32,
+    x: usize,
+    y: usize,
     xed: bool,
 }
 
+// Default values for the BingoNumber struct
+impl Default for BingoNumber {
+    fn default() -> BingoNumber {
+        BingoNumber {
+            num: 0,
+            x: 0,
+            y: 0,
+            xed: false,
+        }
+    }
+}
+
 // This are methods for the board
-pub trait Bingo{
-    fn call(&mut self, c: u32) -> Self;
+trait Bingo{
+    fn call(&mut self, c: u32) -> ();
     fn test(&self) -> bool;
     fn score(&self) -> u32 ;
     fn add(&mut self, num: BingoNumber) -> ();
@@ -38,7 +50,7 @@ pub trait Bingo{
 
 // This is the data of the whole board
 struct BingoBoard{
-    n: usize,
+    n: u32,
     rows: Vec<u32>,
     cols: Vec<u32>,
     nums: Vec<BingoNumber>,
@@ -48,7 +60,7 @@ struct BingoBoard{
 impl BingoBoard {
     pub fn new(m: u32) -> Self {
         Self{
-            n: m.try_into().expect("Too large board"),
+            n: m,
             rows: vec![0; m.try_into().expect("Too large board")],
             cols: vec![0; m.try_into().expect("Too large board")],
             nums: Vec::<BingoNumber>::new(),
@@ -58,14 +70,34 @@ impl BingoBoard {
 
 // Implement Bingo on BingoBoard
 impl Bingo for BingoBoard {
-    fn call(&mut self, c: u32) -> Self{
-
+    fn call(&mut self, c: u32) -> (){
+        // TODO this is ugly and slow O(n2)
+        for i in 0..self.nums.len() {
+            if c == self.nums[i].num {
+                if !self.nums[i].xed{
+                    self.rows[self.nums[i].y] += 1;
+                    self.cols[self.nums[i].x] += 1;
+                    self.nums[i].xed = true
+                }
+            }
+        }
     }
     fn test(&self) -> bool{
-
+        for i in 0..self.n as usize {
+            if self.rows[i] == self.n || self.cols[i] == self.n {
+                return true
+            }
+        }
+        false
     }
     fn score(&self) -> u32{
-
+        let mut sum = 0;
+        for bn in &self.nums {
+            if !bn.xed {
+                sum += bn.num;
+            }
+        }
+        sum
     }
     fn add(&mut self, num: BingoNumber) -> (){
         self.nums.push(num)
