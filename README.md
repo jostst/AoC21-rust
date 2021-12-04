@@ -27,3 +27,13 @@ O2 generator rating:    [0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1] or 789
 CO2 scrubber rating:    [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0] or 3586
 Life support rating:    2829354
 ~~~
+
+## Day 4
+~~~
+PART ONE:
+Sum is: 809 and number is 64
+Answer is thus: 51776
+PART TWO
+Sum is: 170 and number is 99
+Answer is thus: 16830
+~~~
