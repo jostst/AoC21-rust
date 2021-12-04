@@ -34,8 +34,10 @@ fn parse_input(lines: io::Lines<io::BufReader<File>>, size: u32) -> (Vec<u32>, V
 
     // Iterate through file and read file into structures
     for (i, line) in lines.enumerate() {
+        // Read current line into string
         let string = line.expect("No line!");
-        // For first line we read a string and fill it into nums
+
+        // For first line we fill the guess numbers in nums
         if i == 0 {
             string
                 .split(",")
@@ -43,10 +45,10 @@ fn parse_input(lines: io::Lines<io::BufReader<File>>, size: u32) -> (Vec<u32>, V
             continue;
         }
 
-        // Completely skip the first line
+        // Completely skip the second line
         if i == 1 {continue;}
         
-        // If this is an empty line and not the first, push the board and initialize a new one
+        // If this is an empty line (not the first), push the board and initialize a new one
         if string.chars().count() == 0 && i != 1{
             board.order();
             boards.push(board);
@@ -74,6 +76,7 @@ fn parse_input(lines: io::Lines<io::BufReader<File>>, size: u32) -> (Vec<u32>, V
 }
 
 // This is PART ONE
+// Determine, which board wins first
 fn part_one(nums: &Vec<u32>, boards: &mut Vec<BingoBoard>) -> (){
     // Part one
     println!("PART ONE:");
@@ -97,6 +100,7 @@ fn part_one(nums: &Vec<u32>, boards: &mut Vec<BingoBoard>) -> (){
 }
 
 // This is PART TWO
+// Determine, which board wins last
 fn part_two(nums: &Vec<u32>, boards: &mut Vec<BingoBoard>) -> (){
     // Part two
     println!("PART TWO");
