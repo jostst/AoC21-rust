@@ -54,57 +54,71 @@ fn main() {
             }
 
             // Now that we have the data, let's play BINGO!
+            part_one(&nums, &mut boards);
+            part_two(&nums, &mut boards);
             
-            // Part one
-            println!("PART ONE:");
-
-            let mut score: u32 = 0;
-            let mut num: u32 = 0;
-
-            'outer: for n in &nums {
-                for i in 0..boards.len() {
-                    boards[i].call(*n);
-                    if boards[i].test() {
-                        score = boards[i].score();
-                        num = *n;
-                        break 'outer;
-                    }
-                }
-            }
-
-            println!("Sum is: {} and number is {}", score, num);
-            println!("Answer is thus: {}", score*num);
-
-            // Part two
-            println!("PART TWO");
-
-            score = 0;
-            num = 0;
-
-            for n in &nums {
-                let mut elim: Vec<usize> = Vec::new();
-                for i in 0..boards.len(){
-                    boards[i].call(*n);
-                    if boards[i].test(){
-                        elim.push(i);
-                        score = boards[i].score();
-                        num = *n;
-                    }
-                };
-
-                elim.iter().rev().for_each(|&x| {
-                    boards.remove(x);
-                });
-            }
-
-            println!("Sum is: {} and number is {}", score, num);
-            println!("Answer is thus: {}", score*num);
         },
         Result::Err(e) => {
             println!("File error!");
             println!("{:?}", e);
         },
     };
+}
+
+// This is the input parser
+fn parse_input() -> (Vec<u32>, Vec<BingoBoard>) {
+
+}
+
+// This is PART ONE
+fn part_one(nums: &Vec<u32>, boards: &mut Vec<BingoBoard>) -> (){
+    // Part one
+    println!("PART ONE:");
+
+    let mut score: u32 = 0;
+    let mut num: u32 = 0;
+
+    'outer: for n in nums {
+        for i in 0..boards.len() {
+            boards[i].call(*n);
+            if boards[i].test() {
+                score = boards[i].score();
+                num = *n;
+                break 'outer;
+            }
+        }
+    }
+
+    println!("Sum is: {} and number is {}", score, num);
+    println!("Answer is thus: {}", score*num);
+}
+
+// This is PART TWO
+fn part_two(nums: &Vec<u32>, boards: &mut Vec<BingoBoard>) -> (){
+    // Part two
+    println!("PART TWO");
+
+    let mut score = 0;
+    let mut num = 0;
+
+    for n in nums {
+        let mut elim: Vec<usize> = Vec::new();
+        for i in 0..boards.len(){
+            boards[i].call(*n);
+            if boards[i].test(){
+                elim.push(i);
+                score = boards[i].score();
+                num = *n;
+            }
+        };
+
+        elim.iter().rev().for_each(|&x| {
+            boards.remove(x);
+        });
+    }
+
+    println!("Sum is: {} and number is {}", score, num);
+    println!("Answer is thus: {}", score*num);
 }
 
 // This is the data of a single number on the board
