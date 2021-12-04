@@ -5,53 +5,11 @@ use std::path::Path;
 fn main() {
     // We will read the data into these two mutable variables
     static SIZE: u32 = 5;
-    let mut nums: Vec<u32> = Vec::<u32>::new();
-    let mut boards: Vec<BingoBoard> = Vec::<BingoBoard>::new();
 
     match read_lines("./input"){
         Result::Ok(lines) => {
-            // Create temporary board that we will read line by line
-            let mut board = BingoBoard::new(SIZE);
-            let mut idx = 0; // This is the new board row index
-
-            // Iterate through file and read file into structures
-            for (i, line) in lines.enumerate() {
-                let string = line.expect("No line!");
-                // For first line we read a string and fill it into nums
-                if i == 0 {
-                    string
-                        .split(",")
-                        .for_each(|x| nums.push(x.parse::<u32>().expect("Not a number")));
-                    continue;
-                }
-
-                // Completely skip the first line
-                if i == 1 {continue;}
-                
-                // If this is an empty line and not the first, push the board and initialize a new one
-                if string.chars().count() == 0 && i != 1{
-                    board.order();
-                    boards.push(board);
-                    board = BingoBoard::new(SIZE);
-                    idx = 0;
-                    continue;
-                }
-
-                // If we got to here, fill the board!
-                string
-                    .split_whitespace()
-                    .enumerate()
-                    .for_each(|(j, x)| {
-                        board.add(BingoNumber{
-                            x: j,
-                            y: idx,
-                            num: x.parse::<u32>().expect("Not a number"),
-                            ..Default::default()
-                        })
-                    });
-                // Increase the row index
-                idx += 1;
-            }
+            // Parse input lines
+            let (nums, mut boards) = parse_input(lines, SIZE);
 
             // Now that we have the data, let's play BINGO!
             part_one(&nums, &mut boards);
@@ -66,8 +24,53 @@ fn main() {
 }
 
 // This is the input parser
-fn parse_input() -> (Vec<u32>, Vec<BingoBoard>) {
+fn parse_input(lines: io::Lines<io::BufReader<File>>, size: u32) -> (Vec<u32>, Vec<BingoBoard>) {
+    let mut nums: Vec<u32> = Vec::<u32>::new();
+    let mut boards: Vec<BingoBoard> = Vec::<BingoBoard>::new();
 
+    // Create temporary board that we will read line by line
+    let mut board = BingoBoard::new(size);
+    let mut idx = 0; // This is the new board row index
+
+    // Iterate through file and read file into structures
+    for (i, line) in lines.enumerate() {
+        let string = line.expect("No line!");
+        // For first line we read a string and fill it into nums
+        if i == 0 {
+            string
+                .split(",")
+                .for_each(|x| nums.push(x.parse::<u32>().expect("Not a number")));
+            continue;
+        }
+
+        // Completely skip the first line
+        if i == 1 {continue;}
+        
+        // If this is an empty line and not the first, push the board and initialize a new one
+        if string.chars().count() == 0 && i != 1{
+            board.order();
+            boards.push(board);
+            board = BingoBoard::new(size);
+            idx = 0;
+            continue;
+        }
+
+        // If we got to here, fill the board!
+        string
+            .split_whitespace()
+            .enumerate()
+            .for_each(|(j, x)| {
+                board.add(BingoNumber{
+                    x: j,
+                    y: idx,
+                    num: x.parse::<u32>().expect("Not a number"),
+                    ..Default::default()
+                })
+            });
+        // Increase the row index
+        idx += 1;
+    }
+    return (nums, boards);
 }
 
 // This is PART ONE
