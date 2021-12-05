@@ -8,6 +8,7 @@ fn main() {
     // Define the results grid
     const SIZE: usize = 1000;
     let mut state: [[i32; SIZE]; SIZE] = [[0; SIZE]; SIZE];
+    // Define the counters for hits
     let mut xeshv: u32 = 0;
     let mut xesal: u32 = 0;
 
@@ -19,7 +20,6 @@ fn main() {
             // Parse input lines
             for line in lines {
                 // parse current line
-                // TODO: this is ugly, fix it, when finished!
                 let string = line.expect("Not a valid line!)");
                 let cap = re.captures(&string).unwrap();
                 let x1: usize = cap[1].parse().unwrap();
@@ -28,8 +28,10 @@ fn main() {
                 let y2: usize = cap[4].parse().unwrap();
 
                 // PART ONE & TWO
-                // check for horizontal line
+                // check for horizontal or vertical line
                 if x1 == x2 || y1 == y2 {
+                    // This will iterate over either loop, since one of the ranges
+                    // must contain only one number
                     for x in cmp::min(x1, x2)..=cmp::max(x1, x2) {
                         for y in cmp::min(y1, y2)..=cmp::max(y1, y2) {
                             if state[y][x] == 1 {
@@ -41,7 +43,6 @@ fn main() {
                     }
                 } else {
                     // This is then a diagonal line
-                    // TODO: shouldn't this be a part of standard library?
                     let xs: Vec<usize> = if x1 > x2 {(x2..=x1).rev().collect()} else {(x1..=x2).collect()};
                     let ys: Vec<usize> = if y1 > y2 {(y2..=y1).rev().collect()} else {(y1..=y2).collect()};
 

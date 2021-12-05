@@ -37,3 +37,11 @@ PART TWO
 Sum is: 170 and number is 99
 Answer is thus: 16830
 ~~~
+
+## Day 5
+~~~
+PART ONE:
+Crossings: 10023
+PART TWO:
+Crossings: 21514
+~~~
