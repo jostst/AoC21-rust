@@ -10,10 +10,9 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-
 fn main() {
     if let Ok(mut ages) = parse_input("./input"){
-
+        println!("{:?}", ages);
     }
 }
 
@@ -24,7 +23,10 @@ fn parse_input(filename: &str) -> io::Result<Vec<i32>>{
         Result::Ok(lines) => {
             // Parse input lines
             for line in lines {
-                
+                ages.append( &mut line.expect("Error on reading line!")
+                                    .split(",")
+                                    .map(|x| x.parse::<i32>().unwrap())
+                                    .collect::<Vec<i32>>());
             }
             return Ok(ages);
         },
