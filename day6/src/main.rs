@@ -10,7 +10,7 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-// Define number of classes
+/// Define number of age classes
 const CLASSNUM:usize = 9;
 
 /// Program entry point
