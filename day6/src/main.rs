@@ -12,7 +12,42 @@ use std::path::Path;
 
 fn main() {
     if let Ok(mut ages) = parse_input("./input"){
-        println!("{:?}", ages);
+        let mut groups: [u64; 9] = [0;9];
+        // Parse groups for day 0
+        for i in 0..9 {
+            groups[i] = ages.iter().fold(0, |acc, &x| acc + if x==i as i32 {1} else {0})
+        }
+
+        // PART ONE
+        for i in 0..80 {
+            // First check how many children we need to add at the end
+            let spawn: i32 = ages.iter().fold(0, |acc, &x| acc + if x == 0 {1} else {0});
+            
+            // Decrement ages
+            ages = ages.iter().map(|&x| if x == 0 {6} else {x-1}).collect();
+
+            // Spawn offspring
+            ages.append(&mut vec![8;spawn as usize]);
+        }
+
+        // PART TWO
+        for i in 0..256 {
+            // Check how many spawns we need
+            let spawn: u64 = groups[0];
+            // Decrement ages
+            for k in 0..8 {
+                groups[k] = groups[k+1];
+            }
+            // Move parents to group 6
+            groups[6] += spawn;
+            // Spawn new
+            groups[8] = spawn;
+        }
+
+        println!("PART ONE:");
+        println!("Number after 80 days: {}", ages.len());
+        println!("PART TWO:");
+        println!("Number afte 256 days: {}", groups[0]+groups[1]+groups[2]+groups[3]+groups[4]+groups[5]+groups[6]+groups[7]+groups[8]);
     }
 }
 
