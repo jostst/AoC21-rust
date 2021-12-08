@@ -46,7 +46,7 @@ fn part_one(datai: &Vec<Display>) -> i32{
 
 /// Calculate verification hash for the second part
 fn part_two(datai: &Vec<Display>) -> i32{
-    let data = datai.clone();
+    let data = datai.to_owned();
     data
         .iter()
         .fold(0, |acc, x| acc + x.clone().decode_value())
@@ -57,6 +57,8 @@ fn part_two(datai: &Vec<Display>) -> i32{
 struct Display {
     combinations: Vec<String>,
     outputs: Vec<String>,
+    rev: HashMap<i32,String>,
+    key: HashMap<String,i32>,
 }
 
 /// Methods enable creation and decoding of a single display
@@ -65,85 +67,83 @@ impl Display {
         Self {
             combinations: cmbs.to_owned(),
             outputs: outpts.to_owned(),
+            rev: HashMap::new(),
+            key: HashMap::new(),
         }
     }
 
-    fn decode_key(self) -> HashMap<String,i32>{
-        let mut rev: HashMap<i32,String> = HashMap::new();
-        let mut key: HashMap<String,i32> = HashMap::new();
+    fn write_pair(&mut self, code: &String, num: i32) -> (){
+        self.rev.insert(num, code.to_string());
+        self.key.insert(Display::sort_string(code), num);
+    }
 
+    fn decode_key(&mut self){
         // First, decode "simple" numbers
-        for comb in self.combinations.iter(){
-            if comb.len() == 2 { rev.insert(1, comb.to_string());}
-            if comb.len() == 3 { rev.insert(7, comb.to_string());}
-            if comb.len() == 4 { rev.insert(4, comb.to_string());}
-            if comb.len() == 7 { rev.insert(8, comb.to_string());}
+        for comb in self.clone().combinations.iter(){
+            if comb.len() == 2 { 
+                self.write_pair(comb, 1);
+            }
+            if comb.len() == 3 {
+                self.write_pair(comb, 7);
+            }
+            if comb.len() == 4 { 
+                self.write_pair(comb, 4)
+            }
+            if comb.len() == 7 {
+                self.write_pair(comb, 8);
+            }
         }
 
-        // Store key for simple values
-        key.insert(Display::sort_string(rev.get(&1).expect("No value")), 1);
-        key.insert(Display::sort_string(rev.get(&4).expect("No value")), 4);
-        key.insert(Display::sort_string(rev.get(&7).expect("No value")), 7);
-        key.insert(Display::sort_string(rev.get(&8).expect("No value")), 8);
-
         // Construct remaining keys with 6 values
-        for comb in self.combinations.iter(){
+        for comb in self.clone().combinations.iter(){
             if comb.len() == 6 {
                 // 9 has 6 segments and contains all letters from 4
-                if comb.chars().fold(0, |acc, c| if rev.get(&4).expect("error").to_string().contains(c) {acc + 1} else {acc}) == 4 {
-                    rev.insert(9, comb.to_string());
-                    key.insert(Display::sort_string(comb), 9);
+                if self.segment_mismatch(4, comb) == 0 {
+                    self.write_pair(comb, 9);
                 }
                 // 0 has 6 segments and is missing one of the letters from 4 but has all segments from 1
-                if comb.chars().fold(0, |acc, c| if rev.get(&4).expect("error").to_string().contains(c) {acc + 1} else {acc}) == 3 &&
-                comb.chars().fold(0, |acc, c| if rev.get(&1).expect("error").to_string().contains(c) {acc + 1} else {acc}) == 2{
-                    rev.insert(0, comb.to_string());
-                    key.insert(Display::sort_string(comb), 0);
+                if self.segment_mismatch(4, comb) == 1 && self.segment_mismatch(1, comb) == 0{
+                    self.write_pair(comb, 0);
                 }
                 // 6 has 6 segments and is missing one of the letters from 1
-                if comb.chars().fold(0, |acc, c| if rev.get(&1).expect("error").to_string().contains(c) {acc + 1} else {acc}) == 1 {
-                    rev.insert(6, comb.to_string());
-                    key.insert(Display::sort_string(comb), 6);
-                }
-            }
-            if comb.len() == 5 {
-                // 3 has 5 segments and contains all letters from 1
-                if comb.chars().fold(0, |acc, c| if rev.get(&1).expect("error").to_string().contains(c) {acc + 1} else {acc}) == 2 {
-                    rev.insert(3, comb.to_string());
-                    key.insert(Display::sort_string(comb), 3);
+                if self.segment_mismatch(1, comb) == 1{
+                    self.write_pair(comb, 6);
                 }
             }
         }
 
         // 2, 5 remain for the final pass, since we differentiate them based on 6!
-        for comb in self.combinations.iter(){
+        for comb in self.clone().combinations.iter(){
             if comb.len() == 5 {
-                // 5 is missing only one element from 6
-                if comb.chars().fold(0, |acc, c| if rev.get(&6).expect("error").to_string().contains(c) {acc + 1} else {acc}) == 5 &&
-                rev.len() >= 8{
-                    rev.insert(5, comb.to_string());
-                    key.insert(Display::sort_string(comb), 5);
+                // 3 has 5 segments and contains all letters from 1
+                if self.segment_mismatch(1, comb) == 0{
+                    self.write_pair(comb, 3);
                 }
-                // 2 is missing two elements from 6
-                if comb.chars().fold(0, |acc, c| if rev.get(&6).expect("error").to_string().contains(c) {acc + 1} else {acc}) == 4 &&
-                rev.len() >= 8 &&
-                comb.chars().fold(0, |acc, c| if rev.get(&1).expect("error").to_string().contains(c) {acc + 1} else {acc}) != 2{
-                    rev.insert(2, comb.to_string());
-                    key.insert(Display::sort_string(comb), 2);
+                // 5 is missing only one element from 6
+                if self.segment_mismatch(6, comb) == 1 {
+                    self.write_pair(comb, 5);
+                }
+                // 2 is missing two elements from 6 and one from 1
+                if self.segment_mismatch(6, comb) == 2 && self.segment_mismatch(1, comb) == 1{
+                    self.write_pair(comb, 2);
                 }
             }
         }
-        key
     }
 
-    pub fn decode_value(self) -> i32 {
-        let key = self.clone().decode_key();
+    pub fn decode_value(&mut self) -> i32 {
+        self.decode_key();
         let mut out: i32 = 0;
         for i in 0..4{
-            let digit = key.get(&Display::sort_string(&self.outputs[i])).expect("not present");
+            let digit = self.key.get(&Display::sort_string(&self.outputs[i])).expect("not present");
             out += digit*(i32::pow(10, 3-i as u32));
         }
         out
+    }
+
+    pub fn segment_mismatch(&self, reference: i32, input: &String) -> i32{
+        let mtch = input.chars().fold(0, |acc, c| if self.rev.get(&reference).expect("error").to_string().contains(c) {acc + 1} else {acc});
+        self.rev.get(&reference).expect("Error!").len() as i32 - mtch
     }
 
     pub fn sort_string(input: &String) -> String {
