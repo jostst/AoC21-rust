@@ -101,13 +101,13 @@ impl Display {
                 if self.segment_mismatch(4, comb) == 0 {
                     self.write_pair(comb, 9);
                 }
-                // 0 has 6 segments and is missing one of the letters from 4 but has all segments from 1
-                if self.segment_mismatch(4, comb) == 1 && self.segment_mismatch(1, comb) == 0{
-                    self.write_pair(comb, 0);
-                }
                 // 6 has 6 segments and is missing one of the letters from 1
                 if self.segment_mismatch(1, comb) == 1{
                     self.write_pair(comb, 6);
+                }
+                // 0 has 6 segments and is missing one of the letters from 4 but has all segments from 1
+                if self.segment_mismatch(4, comb) == 1 && self.segment_mismatch(1, comb) == 0{
+                    self.write_pair(comb, 0);
                 }
             }
         }
@@ -131,18 +131,32 @@ impl Display {
         }
     }
 
+    fn decode_digit(&self, code: &String) -> i32{
+        *self.key.get(&Display::sort_string(code)).expect("not present")
+    }
+
     pub fn decode_value(&mut self) -> i32 {
         self.decode_key();
         let mut out: i32 = 0;
         for i in 0..4{
-            let digit = self.key.get(&Display::sort_string(&self.outputs[i])).expect("not present");
+            let digit = self.decode_digit(&self.outputs[i]);
             out += digit*(i32::pow(10, 3-i as u32));
         }
         out
     }
 
+    fn query_match(&self, reference: &i32, c: char) -> bool {
+        self.rev
+                .get(&reference)
+                .expect("error")
+                .to_string()
+                .contains(c)
+    }
+
     pub fn segment_mismatch(&self, reference: i32, input: &String) -> i32{
-        let mtch = input.chars().fold(0, |acc, c| if self.rev.get(&reference).expect("error").to_string().contains(c) {acc + 1} else {acc});
+        let mtch = input
+                        .chars()
+                        .fold(0, |acc, c| if self.query_match(&reference, c) {acc + 1} else {acc});
         self.rev.get(&reference).expect("Error!").len() as i32 - mtch
     }
 
@@ -155,7 +169,7 @@ impl Display {
     pub fn count_simple(&self) -> i32 {
         self.outputs
             .iter()
-            .fold(0, |acc, x| if x.len() == 2 || x.len() == 3 || x.len() == 4 || x.len() == 7 {acc + 1} else {acc})
+            .fold(0, |acc, x| if [2, 3, 4, 7].contains(&x.len()) {acc + 1} else {acc})
     }
 }
 
