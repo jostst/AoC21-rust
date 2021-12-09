@@ -22,7 +22,7 @@ fn is_minimum(data: &Vec<Vec<i32>>, i: i32, j: i32) -> bool{
 
 /// Get value from the 2D vector. If index is out of bounds, return 9 (max value).
 fn get_safe(data: &Vec<Vec<i32>>, i: i32, j:i32) -> i32 {
-    if i > 0 || j > 0 {
+    if i >= 0 || j >= 0 {
         if let Some(val1) = data.get(i as usize){
             if let Some(val2) = val1.get(j as usize) {
                 *val2
