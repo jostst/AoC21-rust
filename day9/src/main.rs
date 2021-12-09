@@ -12,7 +12,9 @@ fn main() {
 }
 
 /// Check if the point is minimum. Use get_safe function that returns 9 for out of bound
-/// values so that the comparison resolves to true and decision goes to other conditions
+/// values so that the comparison resolves to true and decision goes to other conditions.
+/// This doesn't work if two equal numbers form minimum, but the condition in this form is
+/// explicitly given by the task.
 fn is_minimum(data: &Vec<Vec<i32>>, i: i32, j: i32) -> bool{
     data[i as usize][j as usize] < get_safe(&data, i-1, j) && 
     data[i as usize][j as usize] < get_safe(&data, i+1, j) && 
@@ -21,6 +23,7 @@ fn is_minimum(data: &Vec<Vec<i32>>, i: i32, j: i32) -> bool{
 }
 
 /// Get value from the 2D vector. If index is out of bounds, return 9 (max value).
+/// Return for out of bound is dictated by the logic of the problem
 fn get_safe(data: &Vec<Vec<i32>>, i: i32, j:i32) -> i32 {
     if i >= 0 || j >= 0 {
         if let Some(val1) = data.get(i as usize){
@@ -47,6 +50,8 @@ fn part_one(data: &Vec<Vec<i32>>) -> i32 {
     risk
 }
 
+/// Part two finds minimum and preforms recursive growing while counting newly grown
+/// regions.
 fn part_two(data: &Vec<Vec<i32>>) -> i32{
     let mut sizes: Vec<i32> = Vec::new();
     let mut tmp = data.clone();
@@ -61,6 +66,9 @@ fn part_two(data: &Vec<Vec<i32>>) -> i32{
     sizes[0] * sizes[1] * sizes[2]
 }
 
+/// Recursively grow from initial point (minimum). Algorithm can visit same point multiple
+/// times but doesnt count it towards the area of the basin by tracking visited fields in
+/// a copy of the original matrix
 fn grow(o: &Vec<Vec<i32>>, d: &mut Vec<Vec<i32>>, i:i32, j:i32) -> i32 {
     let mut c = (0, 0, 0, 0, 0);
     if  d[i as usize][j as usize] !=-1 {c.0=1;}
