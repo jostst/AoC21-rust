@@ -11,64 +11,6 @@ fn main() {
     }
 }
 
-fn part_one_old(data: &Vec<Vec<i32>>) -> i32 {
-    let ln = (data.len()-1, data[0].len()-1);
-    let mut risk = 0;
-    for i in 0..=ln.0 {
-        for j in 0..=ln.1 {
-            // Four corners
-            if i==0 && j== 0 {
-                if data[i][j] < data[i+1][j] && data[i][j] < data[i][j+1] {
-                    risk += 1 + data[i][j];
-                }
-            }
-            else if i==0  && j==ln.1 {
-                if data[i][j] < data[i+1][j] && data[i][j] < data[i][j-1] {
-                    risk += 1 + data[i][j];
-                }
-            }
-            else if i==ln.0 && j==0 {
-                if data[i][j] < data[i-1][j] && data[i][j] < data[i][j+1] {
-                    risk += 1 + data[i][j];
-                }
-            }
-            else if i==ln.0 && j==ln.1 {
-                if data[i][j] < data[i-1][j] && data[i][j] < data[i][j-1] {
-                    risk += 1 + data[i][j];
-                }
-            }
-            // Four sides
-            else if i==0 {
-                if data[i][j] < data[i+1][j] && data[i][j] < data[i][j-1] && data[i][j] < data[i][j+1] {
-                    risk += 1 + data[i][j];
-                }
-            }
-            else if i==ln.0 {
-                if data[i][j] < data[i-1][j] && data[i][j] < data[i][j-1] && data[i][j] < data[i][j+1] {
-                    risk += 1 + data[i][j];
-                }
-            }
-            else if j==0 {
-                if data[i][j] < data[i-1][j] && data[i][j] < data[i+1][j] && data[i][j] < data[i][j+1] {
-                    risk += 1 + data[i][j];
-                }
-            }
-            else if j==ln.1 {
-                if data[i][j] < data[i-1][j] && data[i][j] < data[i+1][j] && data[i][j] < data[i][j-1] {
-                    risk += 1 + data[i][j];
-                }
-            }
-            // General element
-            else {
-                if data[i][j] < data[i-1][j] && data[i][j] < data[i+1][j] && data[i][j] < data[i][j-1] && data[i][j] < data[i][j+1] {
-                    risk += 1 + data[i][j];
-                }
-            }
-        }
-    }
-    risk
-}
-
 fn is_minimum(data: &Vec<Vec<i32>>, i: i32, j: i32) -> bool{
     data[i as usize][j as usize] < get_safe(&data, i-1, j) && 
     data[i as usize][j as usize] < get_safe(&data, i+1, j) && 
