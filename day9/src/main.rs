@@ -11,6 +11,8 @@ fn main() {
     }
 }
 
+/// Check if the point is minimum. Use get_safe function that returns 9 for out of bound
+/// values so that the comparison resolves to true and decision goes to other conditions
 fn is_minimum(data: &Vec<Vec<i32>>, i: i32, j: i32) -> bool{
     data[i as usize][j as usize] < get_safe(&data, i-1, j) && 
     data[i as usize][j as usize] < get_safe(&data, i+1, j) && 
@@ -18,23 +20,20 @@ fn is_minimum(data: &Vec<Vec<i32>>, i: i32, j: i32) -> bool{
     data[i as usize][j as usize] < get_safe(&data, i, j-1)
 }
 
+/// Get value from the 2D vector. If index is out of bounds, return 9 (max value).
 fn get_safe(data: &Vec<Vec<i32>>, i: i32, j:i32) -> i32 {
     if i > 0 || j > 0 {
         if let Some(val1) = data.get(i as usize){
             if let Some(val2) = val1.get(j as usize) {
                 *val2
             }
-            else {
-                10
-            }
-        } else {
-            10
-        }
-    } else {
-        10
-    }
+            else { 9 }
+        } else { 9 }
+    } else { 9 }
 }
 
+/// Iterate over the whole table and check for each point if it is minimum
+/// using the aux function is_minimum
 fn part_one(data: &Vec<Vec<i32>>) -> i32 {
     let ln = (data.len()-1, data[0].len()-1);
     let mut risk = 0;
@@ -52,7 +51,7 @@ fn part_two(data: &Vec<Vec<i32>>) -> i32{
     0
 }
 
-/// This returns a vector of ages, as given in the input filename and wrapped in Result
+/// This returns a matrix of depths, as given in the input filename and wrapped in Result
 fn parse_input(filename: &str) -> io::Result<Vec<Vec<i32>>>{
     let mut data: Vec<Vec<i32>> = Vec::new();
     match read_lines(filename){
