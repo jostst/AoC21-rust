@@ -7,7 +7,7 @@ fn main() {
         println!("PART ONE");
         println!("Risk: {}", part_one(&data));
         println!("PART TWO");
-        println!("Risk: {}", part_two(&data));
+        println!("Hash: {}", part_two(&data));
     }
 }
 
@@ -48,7 +48,28 @@ fn part_one(data: &Vec<Vec<i32>>) -> i32 {
 }
 
 fn part_two(data: &Vec<Vec<i32>>) -> i32{
-    0
+    let mut sizes: Vec<i32> = Vec::new();
+    let mut tmp = data.clone();
+    for i in 0..=data.len()-1 {
+        for j in 0..=data[0].len()-1 {
+            if  is_minimum(&data, i as i32, j as i32){
+                sizes.push(grow(data, &mut tmp, i as i32, j as i32));
+            }
+        }
+    }
+    sizes.sort_by(|a, b| b.cmp(a));
+    sizes[0] * sizes[1] * sizes[2]
+}
+
+fn grow(o: &Vec<Vec<i32>>, d: &mut Vec<Vec<i32>>, i:i32, j:i32) -> i32 {
+    let mut c = (0, 0, 0, 0, 0);
+    if  d[i as usize][j as usize] !=-1 {c.0=1;}
+    d[i as usize][j as usize] = -1;
+    if get_safe(&o, i + 1, j) != 9 && get_safe(&o, i + 1, j) > get_safe(&o, i, j) {c.1 = grow(o, d, i+1, j);}
+    if get_safe(&o, i - 1, j) != 9 && get_safe(&o, i - 1, j) > get_safe(&o, i, j) {c.2 = grow(o, d, i-1, j);}
+    if get_safe(&o, i, j + 1) != 9 && get_safe(&o, i, j + 1) > get_safe(&o, i, j) {c.3 = grow(o, d, i, j+1);}
+    if get_safe(&o, i, j - 1) != 9 && get_safe(&o, i, j - 1) > get_safe(&o, i, j) {c.4 = grow(o, d, i, j-1);}
+    c.0 + c.1 + c.2 + c.3 + c.4
 }
 
 /// This returns a matrix of depths, as given in the input filename and wrapped in Result
