@@ -60,19 +60,15 @@ fn propagate_epoch(data: &mut Vec<Vec<i32>>) -> i32 {
     return flashes;
 }
 
-fn safe_increase(d: &mut Vec<Vec<i32>>, i: i32, j: i32) -> () {
-    if i >= 0 && j >= 0 && i < d.len() as i32 && j < d[0].len() as i32 {
-        let i = i as usize;
-        let j = j as usize;
-        d[i][j] += 1;
-    }
-}
-
-fn safe_flash(d: &mut Vec<Vec<i32>>, s: &mut Vec<Vec<bool>>, i: i32, j: i32) -> i32{
-    if i >= 0 && j >= 0 && i < d.len() as i32 && j < d[0].len() as i32 {
-        flash(d, s, i as usize, j as usize)
+/// safe checks if the desired neighbour is safe to use (i.e. not out of bounds). It returns an
+/// Option with Some(new coordinates as usize) for safe indices and None if out of bounds
+fn safe(d: &mut Vec<Vec<i32>>, i: usize, j: usize, n: (i32, i32)) -> Option<(usize, usize)> {
+    let ni: i32 = i as i32 + n.0;
+    let nj: i32 = j as i32 + n.1;
+    if ni >= 0 && nj >= 0 && ni < d.len() as i32 && nj < d[0].len() as i32 {
+        Some((ni as usize, nj as usize))
     } else {
-        0
+        None
     }
 }
 
@@ -86,11 +82,11 @@ fn flash(d: &mut Vec<Vec<i32>>, s: &mut Vec<Vec<bool>>, i: usize, j: usize) -> i
         flashes += 1;
         // Increase naighours
         for neighbour in NEIGHBOURS {
-            safe_increase(d, i as i32 + neighbour.0, j as i32 + neighbour.1);
+            if let Some((ni,nj)) = safe(d, i, j, neighbour){d[ni][nj] += 1;};
         }
         // Recursively flash naighbours
         for neighbour in NEIGHBOURS {
-            flashes += safe_flash(d, s, i as i32 + neighbour.0, j as i32 + neighbour.1);
+            if let Some((ni, nj)) = safe(d, i, j, neighbour) {flashes += flash(d, s, ni, nj);};
         }
     }
     return flashes;
