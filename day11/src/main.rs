@@ -2,8 +2,10 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
+/// Neighbours to visit on events
 const NEIGHBOURS: [(i32,i32); 8] = [(-1,-1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)];
 
+/// Main part of the solution. It works, if first synchronization happens after 100 epochs
 fn main() {
     if let Ok(mut data) = parse_input("./input") {
 
@@ -18,7 +20,7 @@ fn main() {
             i += 1;
             if propagate_epoch(&mut data) ==  elems{
                 println!("First sync at: {}", i);
-                break;
+                 if i > 100 {break;};
             }
         }
     };
