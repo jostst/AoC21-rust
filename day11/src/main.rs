@@ -6,19 +6,17 @@ const NEIGHBOURS: [(i32,i32); 8] = [(-1,-1), (-1, 0), (-1, 1), (0, -1), (0, 1), 
 
 fn main() {
     if let Ok(mut data) = parse_input("./input") {
+
         println!("PART ONE");
-        let mut flashes = 0;
-        for _ in 0..100 {
-            flashes += propagate_epoch(&mut data);;
-        };
+        let flashes = (0..100).fold(0, |acc, _| acc + propagate_epoch(&mut data));
         println!("Flashes: {}", flashes);
         
         println!("PART TWO");
+        let elems = (data.len() as i32)*(data[0].len() as i32);
         let mut i = 100;
         loop {
-            let new_flashes = propagate_epoch(&mut data);
             i += 1;
-            if new_flashes == (data.len() as i32)*(data[0].len() as i32) {
+            if propagate_epoch(&mut data) ==  elems{
                 println!("First sync at: {}", i);
                 break;
             }
@@ -33,29 +31,17 @@ fn propagate_epoch(data: &mut Vec<Vec<i32>>) -> i32 {
     let mut flashed = vec![vec![false; data.len()]; data[0].len()];
     // Number of flashes happened
     let mut flashes = 0;
+    // Size of the data
+    let n = (data.len(), data[0].len());
 
     // First, increase all energy levels by one
-    for i in 0..data.len() {
-        for j in 0..data[i].len() {
-            data[i][j] += 1;
-        };
-    };
+    (0..n.0).for_each(|i| (0..n.1).for_each(|j| data[i][j] += 1));
 
     // Second, flash all above 9
-    for i in 0..data.len() {
-        for j in 0..data[i].len() {
-            flashes += flash(data, &mut flashed, i, j);
-        };
-    };
+    (0..n.0).for_each(|i| (0..n.1).for_each(|j| flashes += flash(data, &mut flashed, i, j)));
 
     // Third, reset to 0 if above 9
-    for i in 0..data.len() {
-        for j in 0..data[i].len() {
-            if data[i][j] > 9 {
-                data[i][j] = 0;
-            };
-        };
-    };
+    (0..n.0).for_each(|i| (0..n.1).for_each(|j| if data[i][j] > 9 {data[i][j] = 0;}));
 
     return flashes;
 }
