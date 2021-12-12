@@ -9,67 +9,11 @@ use std::path::Path;
 use std::collections::HashMap;
 
 fn main() {
-    if let Ok(data) = parse_input("./test1") {
+    if let Ok(data) = parse_input("./input") {
         println!("PART ONE:");
         println!("Paths found: {}", part_one(&data));
         println!("PART TWO:");
         println!("Paths found: {}", part_two(&data));
-    }
-}
-
-fn part_two(data: &HashMap<String, Vec<String>>) -> i32 {
-    let mut paths = vec![vec!["start".to_string()]];
-    find_paths_two(&mut paths, &data);
-    paths.len() as i32
-}
-
-fn count_repeats(path: Vec<String>) -> usize {
-    // count existing repetitions
-    let mut repeat = 0;
-    // This is mutual couting of elements. If element appears only a single time,
-    // we get 1. If it appears 2 times, on the other hand
-    for pt in path.clone() {
-        repeat += path.clone().iter().filter(|&x| x == &pt && x!="start" && x.chars().all(|c| matches!(c, 'a'..='z'))).count();
-    }
-    repeat -= path.clone().iter().filter(|&x| x!="start" && x.chars().all(|c| matches!(c, 'a'..='z'))).count();
-    repeat = repeat / 2;
-    return repeat
-}
-
-fn find_paths_two(paths: &mut Vec<Vec<String>>, data: &HashMap<String, Vec<String>>) -> (){
-    loop {
-        let mut changes = 0;
-        // Create a copy of previous iteration and empty paths
-        let tmp = paths.clone();
-        paths.retain(|_| false);
-
-        // Now iterate over tmp and expand paths. Write new paths into paths and 
-        // increment counter
-        for path in tmp.clone() {
-            // Check if we are at the end, in this case, just store path into output do not do anything
-            if path.clone().last().unwrap() == "end" {
-                paths.push(path);
-            } else {
-                let points: &Vec<String> = data.get(path.clone().last().unwrap()).unwrap();
-
-                for point in points.clone(){
-                    // add "future" repetitions if any
-                    let repeat_new= path.clone().iter().filter(|&x| x == &point && x!="start" && x.chars().all(|c| matches!(c, 'a'..='z'))).count();
-                    if  repeat_new + count_repeats(path.clone()) <= 1 && point != "start" {
-                        changes += 1;
-                        let mut new_path = path.clone();
-                        new_path.push(point);
-                        paths.push(new_path);
-                    }
-                }
-            }
-        }
-
-        // Break if no changes done in this iteration and place tmp back into paths
-        if changes == 0 {
-            //paths.append(&mut tmp);
-            break;
-        };
     }
 }
 
@@ -96,8 +40,7 @@ fn find_paths(paths: &mut Vec<Vec<String>>, data: &HashMap<String, Vec<String>>)
                 let points: &Vec<String> = data.get(path.clone().last().unwrap()).unwrap();
                 for point in points.clone(){
                     // check that point is not all lowercase and already in the path
-                    let repeat = path.clone().iter().filter(|&x| x == &point && x.chars().all(|c| matches!(c, 'a'..='z'))).count();
-                    if  repeat == 0 {
+                    if  will_repeat(path.clone(), &point) == 0 && point != "start"{
                         changes += 1;
                         let mut new_path = path.clone();
                         new_path.push(point);
@@ -109,10 +52,71 @@ fn find_paths(paths: &mut Vec<Vec<String>>, data: &HashMap<String, Vec<String>>)
 
         // Break if no changes done in this iteration and place tmp back into paths
         if changes == 0 {
-            //paths.append(&mut tmp);
             break;
         };
     }
+}
+
+fn part_two(data: &HashMap<String, Vec<String>>) -> i32 {
+    let mut paths = vec![vec!["start".to_string()]];
+    find_paths_two(&mut paths, &data);
+    paths.len() as i32
+}
+
+fn find_paths_two(paths: &mut Vec<Vec<String>>, data: &HashMap<String, Vec<String>>) -> (){
+    loop {
+        let mut changes = 0;
+        // Create a copy of previous iteration and empty paths
+        let tmp = paths.clone();
+        paths.retain(|_| false);
+
+        // Now iterate over tmp and expand paths. Write new paths into paths and 
+        // increment counter
+        for path in tmp.clone() {
+            // Check if we are at the end, in this case, just store path into output do not do anything
+            if path.clone().last().unwrap() == "end" {
+                paths.push(path);
+            } else {
+                let points: &Vec<String> = data.get(path.clone().last().unwrap()).unwrap();
+
+                for point in points.clone(){
+                    if will_repeat(path.clone(), &point) <= 1 && point != "start" {
+                        changes += 1;
+                        let mut new_path = path.clone();
+                        new_path.push(point);
+                        paths.push(new_path);
+                    }
+                }
+            }
+        }
+
+        // Break if no changes done in this iteration and place tmp back into paths
+        if changes == 0 {
+            break;
+        };
+    }
+}
+
+fn count_repeats(path: Vec<String>) -> usize {
+    // count existing repetitions
+    let mut repeat = 0;
+    // This is mutual counting of elements. If element appears only a single time,
+    // we get 1. If it appears 2 times, on the other hand we get 4, since every repetition is
+    // couted twice!
+    for pt in path.clone() {
+        repeat += path.clone().iter().filter(|&x| x == &pt && x!="start" && x.chars().all(|c| matches!(c, 'a'..='z'))).count();
+    }
+    // substract all lowercase elements
+    repeat -= path.clone().iter().filter(|&x| x!="start" && x.chars().all(|c| matches!(c, 'a'..='z'))).count();
+    // divide by two (repetition is now 2 because we count it twice!)
+    repeat = repeat / 2;
+    return repeat
+}
+
+fn will_repeat(path: Vec<String>, add: &String) -> usize {
+    let repeat_old = count_repeats(path.clone());
+    let repeat_new = path.clone().iter().filter(|&x| x == add && x!="start" && x.chars().all(|c| matches!(c, 'a'..='z'))).count();
+    repeat_old + repeat_new
 }
 
 /// This returns a hash map that has all the caverns as keys and caverns it connects to 
