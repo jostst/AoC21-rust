@@ -61,18 +61,19 @@ fn safe(d: &mut Vec<Vec<i32>>, i: usize, j: usize, n: (i32, i32)) -> Option<(usi
 }
 
 /// Flashes the octopus. d are energy levels, s is state, i and j are coordinates
-/// Returns number of flashes performed
+/// Returns number of flashes performed. It recursively propagates the flash around the 
+/// energy matrix
 fn flash(d: &mut Vec<Vec<i32>>, s: &mut Vec<Vec<bool>>, i: usize, j: usize) -> i32{
     let mut flashes = 0;
     // Check if flash
     if !s[i][j] && d[i][j] > 9 {
         s[i][j] = true;
         flashes += 1;
-        // Increase naighours
+        // Increase neighours
         for neighbour in NEIGHBOURS {
             if let Some((ni,nj)) = safe(d, i, j, neighbour){d[ni][nj] += 1;};
         }
-        // Recursively flash naighbours
+        // Recursively flash neighbours
         for neighbour in NEIGHBOURS {
             if let Some((ni, nj)) = safe(d, i, j, neighbour) {flashes += flash(d, s, ni, nj);};
         }
