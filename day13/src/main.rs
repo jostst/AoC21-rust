@@ -7,16 +7,28 @@ fn main() {
     if let Ok((data, instructions)) = parse_input("./input") {
         println!("PART ONE");
         println!("Elements: {}", part_one(&data, &instructions));
+        println!("PART TWO");
+        part_two(&data, &instructions);
     }
 }
 
 fn part_one(data: &Vec<(i32, i32)>, instructions: &Vec<(FoldDirection, i32)>) -> i32 {
     let mut d = data.to_owned();
     fold(&mut d, instructions[0].0, instructions[0].1);
-    for tmp in get_map(&d){
-        println!("{:?}", tmp);
-    }
     count_dots(&get_map(&d))
+}
+
+fn part_two(data: &Vec<(i32, i32)>, instructions: &Vec<(FoldDirection, i32)>) -> (){
+    let mut d = data.to_owned();
+    for instruction in instructions {
+        fold(&mut d, instruction.0, instruction.1);
+    }
+    for tmp in get_map(&d){
+        for segment in tmp {
+            print!("{}", if segment==0 {" "} else {"0"})
+        }
+        println!("");
+    }
 }
 
 fn fold(data: &mut Vec<(i32, i32)>, direction: FoldDirection, idx: i32) -> (){
@@ -39,21 +51,25 @@ fn fold(data: &mut Vec<(i32, i32)>, direction: FoldDirection, idx: i32) -> (){
 }
 
 fn get_map(data: &Vec<(i32, i32)>) -> Vec<Vec<i32>> {
-    // Get size of the map
-    let mut size: (i32, i32) = (0,0);
-    data.clone().iter().for_each(|&(i,j)| {
-        let mut tmp = size;
-        if i > tmp.1 {tmp.1 = i;}
-        if j > tmp.0 {tmp.0 = j;}
-        size = (tmp.0, tmp.1);
-    });
-    size = (size.0+1, size.1+1);
+    let size = get_size(&data);
     // Initialize empty map (filled with 0)
-    let mut map: Vec<Vec<i32>>= vec![vec![0;size.1 as usize];size.0 as usize];
+    let mut map: Vec<Vec<i32>>= vec![vec![0;size.1];size.0];
     for point in data.clone() {
         map[point.1 as usize][point.0 as usize] += 1;
     }
     map
+}
+
+fn get_size(data: &Vec<(i32, i32)>) -> (usize, usize) {
+        // Get size of the map
+        let mut size: (i32, i32) = (0,0);
+        data.clone().iter().for_each(|&(i,j)| {
+            let mut tmp = size;
+            if i > tmp.1 {tmp.1 = i;}
+            if j > tmp.0 {tmp.0 = j;}
+            size = (tmp.0, tmp.1);
+        });
+        ((size.0+1) as usize, (size.1+1) as usize)
 }
 
 fn count_dots(data: &Vec<Vec<i32>>) -> i32 {
