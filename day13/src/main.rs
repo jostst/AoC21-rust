@@ -1,11 +1,10 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
-use std::collections::HashMap;
 use regex::Regex;
 
 fn main() {
-    if let Ok((data, instructions)) = parse_input("./test") {
+    if let Ok((data, instructions)) = parse_input("./input") {
         println!("PART ONE");
         println!("Elements: {}", part_one(&data, &instructions));
     }
@@ -14,9 +13,10 @@ fn main() {
 fn part_one(data: &Vec<(i32, i32)>, instructions: &Vec<(FoldDirection, i32)>) -> i32 {
     let mut d = data.to_owned();
     fold(&mut d, instructions[0].0, instructions[0].1);
-    println!("{:?}", d);
-    // Temporary reutn value to suppres errors in VS Code
-    0
+    for tmp in get_map(&d){
+        println!("{:?}", tmp);
+    }
+    count_dots(&get_map(&d))
 }
 
 fn fold(data: &mut Vec<(i32, i32)>, direction: FoldDirection, idx: i32) -> (){
@@ -40,11 +40,30 @@ fn fold(data: &mut Vec<(i32, i32)>, direction: FoldDirection, idx: i32) -> (){
 
 fn get_map(data: &Vec<(i32, i32)>) -> Vec<Vec<i32>> {
     // Get size of the map
-
+    let mut size: (i32, i32) = (0,0);
+    data.clone().iter().for_each(|&(i,j)| {
+        let mut tmp = size;
+        if i > tmp.1 {tmp.1 = i;}
+        if j > tmp.0 {tmp.0 = j;}
+        size = (tmp.0, tmp.1);
+    });
+    size = (size.0+1, size.1+1);
     // Initialize empty map (filled with 0)
-    let mut map = vec![vec![]];
-
+    let mut map: Vec<Vec<i32>>= vec![vec![0;size.1 as usize];size.0 as usize];
+    for point in data.clone() {
+        map[point.1 as usize][point.0 as usize] += 1;
+    }
     map
+}
+
+fn count_dots(data: &Vec<Vec<i32>>) -> i32 {
+    let mut acc = 0;
+    for column in data.clone(){
+        for cell in column.clone(){
+            if cell > 0 {acc += 1;};
+        };
+    };
+    acc
 }
 
 /// Enum to store fold direction
