@@ -25,7 +25,7 @@ fn part_two(data: &Vec<(i32, i32)>, instructions: &Vec<(FoldDirection, i32)>) ->
     }
     for tmp in get_map(&d){
         for segment in tmp {
-            print!("{}", if segment==0 {" "} else {"0"})
+            print!("{}", if segment==0 {" "} else {"0"});
         }
         println!("");
     }
