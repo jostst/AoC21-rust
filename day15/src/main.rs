@@ -57,32 +57,6 @@ fn dijkstra(data: &Vec<Vec<i32>>) -> i32 {
     distances[distances.len()-1][distances[0].len()-1]
 }
 
-/// Recursive DFS visiting only valid paths
-/// This is too slow
-fn explore(data: &Vec<Vec<i32>>, v: &Vec<Vec<bool>>, i: i32, j: i32) -> i32 {
-    let mut visited = v.to_owned();
-    // Paths from this point costs
-    let mut costs: Vec<i32> = vec![];
-    // If this is the final point (eg. right bottom corner) return move cost
-    if i == data.len() as i32 && j == data[i as usize].len() as i32 {return data[i as usize][j as usize];};
-    // Else, mark as visited
-    visited[i as usize][j as usize] = true;
-    // If not at the end, pass control to neighbours
-    for n in NEIGHBOURS {
-        if i+n.0 >= 0 && j+n.1 >= 0 && i+n.0 < data.len() as i32 && j+n.1 < data[0].len() as i32 {
-            if !visited[(i+n.0) as usize][(j+n.1) as usize]{
-                costs.push(explore(&data, &visited, i+n.0, j+n.1));
-            }
-        }
-    }
-    // Return sum of future moves and this element
-    if let Some(new) = costs.iter().min() {
-        return data[i as usize][j as usize] + new;
-    } else {
-        return data[i as usize][j as usize]
-    }
-}
-
 /// Parse input and return 2D table of costs
 fn parse_input(filename: &str) -> io::Result<Vec<Vec<i32>>>{
     let mut data: Vec<Vec<i32>> = vec![];
