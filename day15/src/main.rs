@@ -1,58 +1,73 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
-use regex::Regex;
-use std::collections::HashMap;
 
 const NEIGHBOURS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
 
 fn main() {
     if let Ok(data) = parse_input("./input") {
         println!("PART ONE");
-        println!("Cost: {}", dijkstra(&data));
+        println!("Cost: {}", dijkstra(&data, 1));
+        println!("PART TWO");
+        println!("Cost: {}", dijkstra(&data, 5));
     };
 }
 
-/// Dijkstra's algorithm
-fn dijkstra(data: &Vec<Vec<i32>>) -> i32 {
-    // Create a set of unvisited nodes
-    let mut unvisited: Vec<(i32,i32)> = vec![];
-    for i in 0..data.len() { for j in 0..data[0].len() {unvisited.push((i as i32,j as i32));};};
+fn get_data(data: &Vec<Vec<i32>>, i: i32, j: i32) -> i32 {
+    let orig = (data.len() as i32, data[0].len() as i32);
+    ((data[(i%orig.0) as usize][(j%orig.1) as usize] + i/orig.0 + j/orig.1)-1)%9 + 1
+}
 
-    // Create a matrix of tantative distances
-    let mut distances: Vec<Vec<i32>> = vec![vec![i32::MAX; data[0].len()]; data.len()];
+
+/// Dijkstra's algorithm
+fn dijkstra(data: &Vec<Vec<i32>>, inflation: i32) -> i32 {
+    let size = (data.len()*inflation as usize, data[0].len()*inflation as usize);
+
+    // Create a matrix of distances
+    let mut distances: Vec<Vec<i32>> = vec![vec![i32::MAX; size.1]; size.0];
     distances[0][0] = 0;
 
+    // Smarter queue
+    let mut visited: Vec<Vec<bool>> = vec![vec![false; size.1]; size.0];
+    let mut queue: Vec<(i32, i32)> = vec![];
+    queue.push((0,0));
+
     // While nodes are still to be visited, repeat
-    while unvisited.len() > 0 as usize {
+    while queue.len() > 0 as usize {
         // Find current node with minimal distance
         let mut dist = i32::MAX;
         let mut current: (i32, i32) = (0, 0);
-        for node in &unvisited {
+        for node in &queue {
             if distances[node.0 as usize][node.1 as usize] < dist {
                 dist = distances[node.0 as usize][node.1 as usize];
                 current = *node;
             }
         }
-        println!("Current: ({},{})", current.0, current.1);
 
-        // Update distances of the neighbour nodes, if needed
+        // Update distances of the neighbour nodes, if needed, and add them to the queue
         for neighbour in NEIGHBOURS {
-            // Check if neighbour is unvisited
-            if let Some(n) = &unvisited.iter().position(|x| *x == (current.0+neighbour.0, current.1+neighbour.1)){
-                let tmp = distances[current.0 as usize][current.1 as usize] + 
-                            data[unvisited[*n].0 as usize][unvisited[*n].1 as usize];
-                if tmp < distances[unvisited[*n].0 as usize][unvisited[*n].1 as usize] {
-                    distances[unvisited[*n].0 as usize][unvisited[*n].1 as usize] = tmp;
+            let n = (current.0+neighbour.0, current.1+neighbour.1);
+            // Verify validity
+            if n.0 >= 0 && n.1 >= 0 && n.0 < size.0 as i32 && n.1 < size.1 as i32{
+                // Check if not visited
+                if !visited[n.0 as usize][n.1 as usize]{
+                    let tmp = distances[current.0 as usize][current.1 as usize] + 
+                                get_data(&data, n.0, n.1);
+                    if tmp < distances[n.0 as usize][n.1 as usize] {
+                        distances[n.0 as usize][n.1 as usize] = tmp;
+                    }
+                    // Add neighbour to the queue
+                    if !queue.contains(&n) {queue.push(n);}
                 }
             }
         }
 
-        // Remove current node from unvisited - e.g. mark current visited
-        unvisited.remove(*&unvisited.iter().position(|x| *x == current).unwrap());
+        // Remove current node from unvisited and mark current visited
+        queue.remove(*&queue.iter().position(|x| *x == current).unwrap());
+        visited[current.0 as usize][current.1 as usize] = true;
 
         // If the destination node was visited, break -> we win
-        if current == ((distances.len()-1) as i32, (distances[0].len()-1) as i32) {break;} 
+        if current == ((size.0-1) as i32, (size.1-1) as i32) {break;} 
     }
     distances[distances.len()-1][distances[0].len()-1]
 }
@@ -60,8 +75,6 @@ fn dijkstra(data: &Vec<Vec<i32>>) -> i32 {
 /// Parse input and return 2D table of costs
 fn parse_input(filename: &str) -> io::Result<Vec<Vec<i32>>>{
     let mut data: Vec<Vec<i32>> = vec![];
-    // Define input parsing regex for instructions
-    let re = Regex::new(r"([A-Z])([A-Z]) -> ([A-Z])").expect("Invalid regex!");
     match read_lines(filename){
         Result::Ok(lines) => {            // Parse input lines
             for line in lines {
