@@ -61,9 +61,11 @@ fn dijkstra(data: &Vec<Vec<i32>>, inflation: i32) -> i32 {
 
 /// Get data. Takes data inflation for part 2 into account
 fn get_data(data: &Vec<Vec<i32>>, i: usize, j: usize) -> i32 {
+    // Cast all points to i32 and calculate original data size
     let i: i32 = i as i32;
     let j: i32 = j as i32;
     let orig = (data.len() as i32, data[0].len() as i32);
+    // A clever way to inflate the data as described by the task
     ((data[(i%orig.0) as usize][(j%orig.1) as usize] + i/orig.0 + j/orig.1)-1)%9 + 1
 }
 
@@ -74,8 +76,9 @@ fn unvisited_neighbours(point: (usize, usize), visited: &Vec<Vec<bool>>) -> Vec<
     let size = (visited.len(), visited[0].len());
 
     for neighbour in NEIGHBOURS {
+        // Generate next neighbour according to direction vectors
         let n: (i32, i32) = (point.0 as i32 + neighbour.0, point.1 as i32 + neighbour.1);
-
+        // Check if valid
         if n.0 >= 0 && n.1 >= 0 && n.0 < size.0 as i32 && n.1 < size.1 as i32{
             // Check if not visited
             if !visited[n.0 as usize][n.1 as usize] {
